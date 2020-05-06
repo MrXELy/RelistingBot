@@ -40,7 +40,7 @@ if args.headless is True:
 options.add_argument('--disable-extensions')
 options.add_argument('--profile-directory=Profile 1')
 options.add_argument('--user-data-dir=' + CHROME_PROFILE_PATH)
-options.add_argument('--start-maximized')
+options.add_argument('start-maximized')
 
 # Open Chrome
 print('[LOG] Opening Chrome...')
@@ -55,6 +55,7 @@ try:
 #     exit()
 except:
     print('[FAIL] Error while using chromeloader: please make sure you have downloaded chromedriver and that no other session is already in use')
+    driver.quit()
     exit()
 sleep(1)
 
@@ -71,10 +72,12 @@ while True:
         print('[SUCCESS] WebApp opened')
     except NoSuchElementException:
         print('[FAIL] WebApp opening failed')
+        driver.quit()
         exit()
     
     if args.init is True:
         print("Connect manually for the first time, get two-factor-authentification code if needed. When done, please use the program without '--init'")
+        driver.quit()
         exit()
 
     sleep(10)
@@ -91,6 +94,7 @@ while True:
         driver.find_element_by_xpath('//*[@id="btnLogin"]/span/span').click()
         if driver.find_element_by_xpath('//*[@class="general-error"]') is not None:
             print("[FAIL] Login failed ! Wrong email or password")
+            driver.quit()
             exit()
     except NoSuchElementException:
         print('[SUCCESS] Already logged in')
@@ -103,6 +107,7 @@ while True:
         sleep(3)
     except ElementClickInterceptedException: # TODO handle daily gift popup
         print('[FAIL] Daily gift ?')
+        driver.quit()
         exit()
 
     print('[LOG] Clicking on Transfer list')
@@ -119,6 +124,7 @@ while True:
         print('[SUCCESS] No players to relist')
 
     print('[WAIT] Waiting for 1 hour...')
+    driver.quit()
     sleep(3660)
 
 system("pause")
