@@ -13,10 +13,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--username", help="FUT EA account email")
 parser.add_argument("-p", "--password", help="FUT EA account password")
 parser.add_argument("--init", help="Use init the first time you use this program", action="store_true")
+parser.add_argument("--headless", help="Run headless", action="store_true")
 
 args = parser.parse_args()
 
 # TODO Use functions or classes for more readability
+# TODO Wait loadings
 
 username = args.username
 
@@ -33,6 +35,8 @@ elif args.password is not None:
 # Chrome options
 options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
+if args.headless is True:
+    options.add_argument('--headless')
 options.add_argument('--disable-extensions')
 options.add_argument('--profile-directory=Profile 1')
 options.add_argument('--user-data-dir=' + CHROME_PROFILE_PATH)
@@ -61,10 +65,16 @@ while True:
     # Open web app
     print('[LOG] Opening WebApp...')
     driver.get(WEBAPP_URL)
-    print('[SUCCESS] WebApp opened')
+    sleep(5)
+    try:
+        driver.find_element_by_xpath('//*[@id="futweb-loader"]')
+        print('[SUCCESS] WebApp opened')
+    except NoSuchElementException:
+        print('[FAIL] WebApp opening failed')
+        exit()
     
     if args.init is True:
-        print("Connect manually for the first time. When done, please use the program without '--init'")
+        print("Connect manually for the first time, get two-factor-authentification code if needed. When done, please use the program without '--init'")
         exit()
 
     sleep(10)
@@ -84,20 +94,20 @@ while True:
             exit()
     except NoSuchElementException:
         print('[SUCCESS] Already logged in')
-    sleep(10)
+    sleep(15)
 
     try:
         print('[LOG] Clicking on Transfers')
         driver.find_element_by_xpath("//*[contains(text(), 'Transfers')]").click()
         print('[SUCCESS] Logged in')
-        sleep(1)
+        sleep(3)
     except ElementClickInterceptedException: # TODO handle daily gift popup
         print('[FAIL] Daily gift ?')
         exit()
 
     print('[LOG] Clicking on Transfer list')
     driver.find_element_by_xpath("//*[contains(text(), 'Transfer List')]").click()
-    sleep(2)
+    sleep(3)
 
     print('[LOG] Looking for players to relist...')
     try:
