@@ -1,22 +1,42 @@
+from sys import exit
+from os import system
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, InvalidArgumentException, WebDriverException, ElementNotInteractableException
 from time import sleep
-from password import pw
+from getpass import getpass
+import argparse
+
+CHROME_PROFILE_PATH = './CustomProfile'
+WEBAPP_URL = 'https://www.easports.com/fifa/ultimate-team/web-app/'
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-u", "--username", help="FUT EA account email")
+parser.add_argument("-p", "--password", help="FUT EA account password")
+parser.add_argument("--init", help="Use init the first time you use this program", action="store_true")
+
+args = parser.parse_args()
+
 
 # TODO Use functions or classes for more readability
-# TODO Use argparse to get user email
-# TODO Get (hashed) password
 
-username = 'druisr@gmail.com'
-chrome_profile_path = './CustomProfile'
-webapp_url = 'https://www.easports.com/fifa/ultimate-team/web-app/'
+username = args.username
+
+if args.username is None and args.init is not True:
+    username = input("Email: ")
+elif args.username is not None:
+    username = args.username
+
+if args.password is None and args.init is not True:
+    pw = getpass()
+elif args.password is not None:
+    pw = args.password
 
 # Chrome options
 options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
 options.add_argument('--disable-extensions')
 options.add_argument('--profile-directory=Profile 1')
-options.add_argument('--user-data-dir=' + chrome_profile_path)
+options.add_argument('--user-data-dir=' + CHROME_PROFILE_PATH)
 options.add_argument('--start-maximized')
 
 # Open Chrome
@@ -37,12 +57,17 @@ sleep(1)
 
 # Main loop
 while True: # TODO Handle daily gifts
-    print('[INFO] TO END PROGRAM, PRESS CTRL+C')
+    print('\n[INFO] TO END PROGRAM, PRESS CTRL+C\n')
 
     # Open web app
     print('[LOG] Opening WebApp...')
-    driver.get(webapp_url)
+    driver.get(WEBAPP_URL)
     print('[SUCCESS] WebApp opened')
+    
+    if args.init is True:
+        print("Connect manually for the first time. When done, please use the program without '--init'")
+        exit()
+
     sleep(10)
 
     # Log in
@@ -61,21 +86,27 @@ while True: # TODO Handle daily gifts
     sleep(10)
 
     print('[LOG] Clicking on Transfers')
-    driver.find_element_by_xpath('/html/body/main/section/nav/button[3]').click()
+    # driver.find_element_by_xpath('/html/body/main/section/nav/button[3]').click()
+    driver.find_element_by_xpath("//*[contains(text(), 'Transfers')]").click()
     sleep(1)
 
     print('[LOG] Clicking on Transfer list')
-    driver.find_element_by_xpath('/html/body/main/section/section/div[2]/div/div/div[3]').click()
+    # driver.find_element_by_xpath('/html/body/main/section/section/div[2]/div/div/div[3]').click()
+    driver.find_element_by_xpath("//*[contains(text(), 'Transfer List')]").click()
     sleep(2)
 
     print('[LOG] Looking for players to relist...')
     try:
-        driver.find_element_by_xpath('/html/body/main/section/section/div[2]/div/div/div/section[2]/header/button').click()
+        # driver.find_element_by_xpath('/html/body/main/section/section/div[2]/div/div/div/section[2]/header/button').click()
+        driver.find_element_by_xpath("//*[contains(text(), 'Re-list All')]").click()
         sleep(1)
-        driver.find_element_by_xpath('/html/body/div[4]/section/div/div/button[2]/span[1]').click()
-        player('[SUCCESS] Players relisted')
+        # driver.find_element_by_xpath('/html/body/div[4]/section/div/div/button[2]/span[1]').click()
+        driver.find_element_by_xpath("//*[contains(text(), 'Yes')]").click()
+        print('[SUCCESS] Players relisted')
     except ElementNotInteractableException:
         print('[SUCCESS] No players to relist')
 
     print('[WAIT] Waiting for 1 hour...')
-    sleep(10)
+    sleep(3660)
+
+system("pause")

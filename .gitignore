@@ -2,3 +2,6 @@ password.py
 __pycache__/
 CustomProfile/
 venv/
+dist/
+build/
+*.spec
