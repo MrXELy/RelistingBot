@@ -79,6 +79,9 @@ while True:
         driver.find_element_by_xpath('//*[@id="email"]').send_keys(username)
         driver.find_element_by_xpath('//*[@id="password"]').send_keys(pw)
         driver.find_element_by_xpath('//*[@id="btnLogin"]/span/span').click()
+        if driver.find_element_by_xpath('//*[@class="general-error"]') is not None:
+            print("[FAIL] Login failed ! Wrong email or password")
+            exit()
     except NoSuchElementException:
         print('[SUCCESS] Already logged in')
     sleep(10)
@@ -91,9 +94,6 @@ while True:
     except ElementClickInterceptedException: # TODO handle daily gift popup
         print('[FAIL] Daily gift ?')
         exit()
-    except NoSuchElementException:
-        print('[FAIL] Login failed. Wrong email or password ?')
-        exit()
 
     print('[LOG] Clicking on Transfer list')
     driver.find_element_by_xpath("//*[contains(text(), 'Transfer List')]").click()
@@ -102,7 +102,7 @@ while True:
     print('[LOG] Looking for players to relist...')
     try:
         driver.find_element_by_xpath("//*[contains(text(), 'Re-list All')]").click()
-        sleep(1)
+        sleep(3)
         driver.find_element_by_xpath("//*[contains(text(), 'Yes')]").click()
         print('[SUCCESS] Players relisted')
     except ElementNotInteractableException:
