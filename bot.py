@@ -1,7 +1,7 @@
 from sys import exit
 from os import system
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, InvalidArgumentException, WebDriverException, ElementNotInteractableException
+from selenium.common.exceptions import NoSuchElementException, InvalidArgumentException, WebDriverException, ElementNotInteractableException, ElementClickInterceptedException
 from time import sleep
 from getpass import getpass
 import argparse
@@ -15,7 +15,6 @@ parser.add_argument("-p", "--password", help="FUT EA account password")
 parser.add_argument("--init", help="Use init the first time you use this program", action="store_true")
 
 args = parser.parse_args()
-
 
 # TODO Use functions or classes for more readability
 
@@ -56,7 +55,7 @@ except:
 sleep(1)
 
 # Main loop
-while True: # TODO Handle daily gifts
+while True:
     print('\n[INFO] TO END PROGRAM, PRESS CTRL+C\n')
 
     # Open web app
@@ -80,27 +79,30 @@ while True: # TODO Handle daily gifts
         driver.find_element_by_xpath('//*[@id="email"]').send_keys(username)
         driver.find_element_by_xpath('//*[@id="password"]').send_keys(pw)
         driver.find_element_by_xpath('//*[@id="btnLogin"]/span/span').click()
-        print('[SUCCESS] Logged in')
     except NoSuchElementException:
         print('[SUCCESS] Already logged in')
     sleep(10)
 
-    print('[LOG] Clicking on Transfers')
-    # driver.find_element_by_xpath('/html/body/main/section/nav/button[3]').click()
-    driver.find_element_by_xpath("//*[contains(text(), 'Transfers')]").click()
-    sleep(1)
+    try:
+        print('[LOG] Clicking on Transfers')
+        driver.find_element_by_xpath("//*[contains(text(), 'Transfers')]").click()
+        print('[SUCCESS] Logged in')
+        sleep(1)
+    except ElementClickInterceptedException: # TODO handle daily gift popup
+        print('[FAIL] Daily gift ?')
+        exit()
+    except NoSuchElementException:
+        print('[FAIL] Login failed. Wrong email or password ?')
+        exit()
 
     print('[LOG] Clicking on Transfer list')
-    # driver.find_element_by_xpath('/html/body/main/section/section/div[2]/div/div/div[3]').click()
     driver.find_element_by_xpath("//*[contains(text(), 'Transfer List')]").click()
     sleep(2)
 
     print('[LOG] Looking for players to relist...')
     try:
-        # driver.find_element_by_xpath('/html/body/main/section/section/div[2]/div/div/div/section[2]/header/button').click()
         driver.find_element_by_xpath("//*[contains(text(), 'Re-list All')]").click()
         sleep(1)
-        # driver.find_element_by_xpath('/html/body/div[4]/section/div/div/button[2]/span[1]').click()
         driver.find_element_by_xpath("//*[contains(text(), 'Yes')]").click()
         print('[SUCCESS] Players relisted')
     except ElementNotInteractableException:
