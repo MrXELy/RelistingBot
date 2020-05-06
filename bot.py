@@ -19,6 +19,7 @@ args = parser.parse_args()
 
 # TODO Use functions or classes for more readability
 # TODO Wait loadings
+# TODO logging https://docs.python.org/3/howto/logging.html
 
 username = args.username
 
@@ -55,7 +56,6 @@ try:
 #     exit()
 except:
     print('[FAIL] Error while using chromeloader: please make sure you have downloaded chromedriver and that no other session is already in use')
-    driver.quit()
     exit()
 sleep(1)
 
@@ -92,18 +92,21 @@ while True:
         driver.find_element_by_xpath('//*[@id="email"]').send_keys(username)
         driver.find_element_by_xpath('//*[@id="password"]').send_keys(pw)
         driver.find_element_by_xpath('//*[@id="btnLogin"]/span/span').click()
-        if driver.find_element_by_xpath('//*[@class="general-error"]') is not None:
+        try:
+            driver.find_element_by_xpath('//*[@class="general-error"]')
             print("[FAIL] Login failed ! Wrong email or password")
             driver.quit()
             exit()
+        except NoSuchElementException:
+            pass
     except NoSuchElementException:
-        print('[SUCCESS] Already logged in')
+        pass
+    print('[SUCCESS] Logged in')
     sleep(15)
 
     try:
         print('[LOG] Clicking on Transfers')
         driver.find_element_by_xpath("//*[contains(text(), 'Transfers')]").click()
-        print('[SUCCESS] Logged in')
         sleep(3)
     except ElementClickInterceptedException: # TODO handle daily gift popup
         print('[FAIL] Daily gift ?')
@@ -124,7 +127,9 @@ while True:
         print('[SUCCESS] No players to relist')
 
     print('[WAIT] Waiting for 1 hour...')
+    sleep(10)
     driver.quit()
+    exit()
     sleep(3660)
 
 system("pause")
