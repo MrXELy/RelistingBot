@@ -1,4 +1,4 @@
-from bot import *
+from WebAppBot import *
 from time import sleep
 from getpass import getpass
 import argparse

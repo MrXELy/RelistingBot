@@ -4,7 +4,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import selenium.common.exceptions as EX
 from time import sleep
-from signal import signal, SIGINT
 
 
 CHROME_PROFILE_PATH = './CustomProfile'
@@ -190,21 +189,44 @@ class WebAppBot:
             self.quit()
 
 
-    def players_in_pile(self):
+    def get_players_in_transfer_list(self): # all transfer list
         try:
             return self.driver.find_elements_by_css_selector("li.listFUTItem")
         except Exception as e:
             print("[FAIL]", e)
-            self.quit()
 
 
-    def players_sold(self):
+    def get_players_sold(self):
         try:
             return self.driver.find_elements_by_css_selector("li.listFUTItem.won")
         except Exception as e:
             print("[FAIL]", e)
-            self.quit()
+            
+            
+    def get_players_unsold(self):
+        try:
+            return self.driver.find_elements_by_css_selector("li.listFUTItem.expired")
+        except Exception as e:
+            print("[FAIL]", e)
 
+
+    def get_players_has_auction_data(self): # exclude players not listed but in transfer list
+        try:
+            return self.driver.find_elements_by_css_selector("li.listFUTItem.has-auction-data") # pas bon
+        except Exception as e:
+            print("[FAIL]", e)
+            
+            
+    def get_players_active(self): # get player still active 
+        auction_data = self.get_players_has_auction_data()
+        sold = self.get_players_sold()
+        unsold = self.get_players_unsold()
+        active = []
+        for e in auction_data:
+            if e not in sold and e not in unsold:
+                active.append(e)
+                
+        return active
 
 
 if __name__ == "__main__":
@@ -213,7 +235,3 @@ if __name__ == "__main__":
     bot.login()
     bot.click_transfers()
     bot.click_transfer_list()
-
-    print(f'{len(bot.players_in_pile())} players in pile, {(len(bot.players_sold())} sold.')
-    
-    bot.quit()
