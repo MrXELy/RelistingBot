@@ -123,9 +123,9 @@ class WebAppBot:
     def wait_webapp_loaded(self):
         print('[LOG] Loading WebApp...')
         try: # ? Sometimes "click-shield" intercepts the click
-            element_tmp = WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.XPATH, '/html/body/div[4]')))
+            element_tmp = WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
             sleep(1)
-            element_tmp = WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.XPATH, '/html/body/div[4]')))
+            element_tmp = WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
 
             print('[SUCCESS] WebApp loaded')
         except EX.TimeoutException:
@@ -175,7 +175,7 @@ class WebAppBot:
             print('[SUCCESS] No players to relist')
             
             
-    def auto_relist(self):
+    def auto_relist(self): # main loop
         try:
             while True:
                 self.open_webapp()
