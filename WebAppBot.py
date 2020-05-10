@@ -8,8 +8,6 @@ from time import sleep
 
 CHROME_PROFILE_PATH = './CustomProfile'
 WEBAPP_URL = 'https://www.easports.com/fifa/ultimate-team/web-app/'
-username = ''
-pw = ''
 
 
 class WebAppBot:
@@ -53,28 +51,29 @@ class WebAppBot:
         print('[LOG] Opening WebApp...')
         self.driver.get(WEBAPP_URL)
         try:
-            element_tmp = WebDriverWait(self.driver, 30).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Login"]/div/div/header')))
+            WebDriverWait(self.driver, 30).until(EC.visibility_of_element_located((By.CLASS_NAME, 'ut-fut-logo')))
             print('[SUCCESS] WebApp opened')
         except EX.TimeoutException:
             print('[FAIL] Timeout')
             self.quit()
-            
+
+
     def login(self):
         print('[LOG] Logging in...')
         sleep(1)
         
         try:
-            element_tmp = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Login"]/div/div/button[1]')))
-            self.driver.find_element_by_xpath('//*[@id="Login"]/div/div/button[1]').click()
+            WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn-standard.call-to-action')))
+            self.driver.find_element_by_css_selector('button.btn-standard.call-to-action').click()
             
             print('[LOG] Trying to log in...')
             try:
-                element_tmp = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="email"]')))
+                WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="email"]')))
                 self.driver.find_element_by_xpath('//*[@id="email"]').clear()
                 self.driver.find_element_by_xpath('//*[@id="email"]').send_keys(self.username)
                 self.driver.find_element_by_xpath('//*[@id="password"]').send_keys(self.pw)
-                self.driver.find_element_by_xpath('//*[@id="btnLogin"]/span/span').click()
-                
+                self.driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
+
                 print('[LOG] Is there an error ?')
                 try:
                     self.driver.find_element_by_xpath('//*[@class="general-error"]')
@@ -88,12 +87,14 @@ class WebAppBot:
                 print('[FAIL] Timeout')
         except EX.TimeoutException:
             print('[SUCCESS] Already logged in')
+        
+        WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
         self.wait_webapp_loaded()
             
             
     def login_verification(self):
         try:
-            element_tmp = WebDriverWait(self.driver, 1).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="panel-tfa"]/div/div/div/h1')))
+            WebDriverWait(self.driver, 1).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="panel-tfa"]/div/div/div/h1')))
         except EX.TimeoutException:
             return 'no verif'
         
@@ -104,6 +105,7 @@ class WebAppBot:
             self.driver.find_element_by_xpath('//*[@id="btnSendCode"]').click()
         except Exception:
             print('[FAIL]', e)
+            print('[FAIL] Try to manually enter the code, then restart the program')
             self.quit()
 
         repeat = True
@@ -119,13 +121,13 @@ class WebAppBot:
             except EX.NoSuchElementException:
                 repeat = False
 
-           
+
     def wait_webapp_loaded(self):
         print('[LOG] Loading WebApp...')
         try: # ? Sometimes "click-shield" intercepts the click
-            element_tmp = WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
+            WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
             sleep(1)
-            element_tmp = WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
+            WebDriverWait(self.driver, 60).until(EC.invisibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
 
             print('[SUCCESS] WebApp loaded')
         except EX.TimeoutException:
@@ -187,51 +189,3 @@ class WebAppBot:
                 sleep(3660)
         except KeyboardInterrupt:
             self.quit()
-
-
-    def get_players_in_transfer_list(self): # all transfer list
-        try:
-            return self.driver.find_elements_by_css_selector("li.listFUTItem")
-        except Exception as e:
-            print("[FAIL]", e)
-
-
-    def get_players_sold(self):
-        try:
-            return self.driver.find_elements_by_css_selector("li.listFUTItem.won")
-        except Exception as e:
-            print("[FAIL]", e)
-            
-            
-    def get_players_unsold(self):
-        try:
-            return self.driver.find_elements_by_css_selector("li.listFUTItem.expired")
-        except Exception as e:
-            print("[FAIL]", e)
-
-
-    def get_players_has_auction_data(self): # exclude players not listed but in transfer list
-        try:
-            return self.driver.find_elements_by_css_selector("li.listFUTItem.has-auction-data") # pas bon
-        except Exception as e:
-            print("[FAIL]", e)
-            
-            
-    def get_players_active(self): # get player still active 
-        auction_data = self.get_players_has_auction_data()
-        sold = self.get_players_sold()
-        unsold = self.get_players_unsold()
-        active = []
-        for e in auction_data:
-            if e not in sold and e not in unsold:
-                active.append(e)
-                
-        return active
-
-
-if __name__ == "__main__":
-    bot = WebAppBot(username, pw)
-    bot.open_webapp()
-    bot.login()
-    bot.click_transfers()
-    bot.click_transfer_list()
