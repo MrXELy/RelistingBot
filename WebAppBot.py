@@ -81,14 +81,14 @@ class WebAppBot:
                     self.quit()
                 except EX.NoSuchElementException:
                     print("[SUCCESS] Logged in!")
-                
+                    WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
                 self.login_verification()
             except EX.TimeoutException:
-                print('[FAIL] Timeout')
+                print('[FAIL] Timeout: probably already logged in')
+                
         except EX.TimeoutException:
             print('[SUCCESS] Already logged in')
         
-        WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.CLASS_NAME, 'ut-click-shield')))
         self.wait_webapp_loaded()
             
             
