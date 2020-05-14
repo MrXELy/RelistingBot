@@ -9,6 +9,14 @@ from time import sleep
 CHROME_PROFILE_PATH = './CustomProfile'
 WEBAPP_URL = 'https://www.easports.com/fifa/ultimate-team/web-app/'
 
+def countdown(t):
+	while t:
+		mins, secs = divmod(t, 60)
+		timeformat = '[WAIT] {:02d}:{:02d}'.format(mins, secs)
+		print(timeformat, end='\r')
+		sleep(1)
+		t -= 1
+
 
 class WebAppBot:
     def __init__(self, username, pw):
@@ -175,8 +183,8 @@ class WebAppBot:
                 print('[FAIL] Timeout')
         except EX.ElementNotInteractableException:
             print('[SUCCESS] No players to relist')
-            
-            
+
+
     def auto_relist(self): # main loop
         try:
             while True:
@@ -184,8 +192,8 @@ class WebAppBot:
                 self.login()
                 self.relist_all()
 
-                print('[WAIT] 1 hour... Do not close the window! You can minimize it')
-                print('[INFO] Press Ctrl+C to close the program')
-                sleep(3660)
+                print('[WAIT] Do not close the window! You can minimize it')
+                print('[WAIT] Press Ctrl+C to close the program')
+                countdown(3630)
         except KeyboardInterrupt:
             self.quit()
